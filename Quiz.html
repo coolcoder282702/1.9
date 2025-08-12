@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quizzes - SJKT DLP</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <img src="1000000621-removebg-preview.png" alt="SJKT DLP Year 5 Syllabus Hub Logo" class="site-logo">
+            <div>
+                <h1>St.John Bosco Study Hub</h1>
+                <p>Enhancing Learning for Indian Students</p>
+            </div>
+        </div>
+        <button class="hamburger" onclick="toggleNav()">
+            <i class="fas fa-bars"></i>
+        </button>
+    </header>
+
+    <nav class="side-nav" id="sideNav">
+        <a href="index.html"style="color:#A31621;">Home</a>
+        <a href="notes.html"style="color:#A31621;">Notes</a>
+        <a href="quiz.html"style="color:#A31621;">Quiz</a>
+        <a href="group.html"style="color:#A31621;">Join Group</a>
+        <a href="feedback.html"style="color:#A31621;">Feedback</a>
+        <a href="teacher.html"style="color:#A31621;">Become a Teacher</a>
+        <a href="donate.html"style="color:#A31621;">Donate</a>
+        <a href="faq.html"style="color:#A31621;">FAQ</a>
+        <a href="credits.html"style="color:#A31621;">Credits</a>
+        <a href="news.html"style="color:#A31621;">News</a>
+        <a href="about us.html"style="color:#A31621;">About Us</a>
+    </nav>
+    <div class="overlay" onclick="toggleNav()"></div>
+
+    <div class="container">
+        <section id="quiz">
+            <h2>Challenge Yourself with Quizzes!</h2>
+            <div class="quiz-intro-text">
+                <p>Select a subject to start a timed quiz. Each quiz consists of a few questions to test your understanding of the topics.</p>
+            </div>
+            <div class="quiz-subject-selection">
+                <button onclick="startQuiz('Mathematics')">Mathematics Quiz</button>
+                <button onclick="startQuiz('Science')">Science Quiz</button>
+                <button onclick="startQuiz('Malay Language')">Malay Language Quiz</button>
+                <button onclick="startQuiz('Tamil Language')">Tamil Language Quiz</button>
+                <button onclick="startQuiz('History')">History Quiz</button>
+                <button onclick="startQuiz('English Language')">English Language Quiz</button>
+            </div>
+
+            <div id="quiz-timer-container" class="quiz-timer-container" style="display: none;">
+                <div>Time Left: <span id="timer-display">05:00</span></div>
+            </div>
+
+            <div id="subject-quiz-container" class="subject-quiz-container" style="display: none;">
+                </div>
+
+            <button id="quiz-submit-button" class="quiz-button" style="display: none;">Submit Quiz</button>
+
+            <div id="quiz-results" style="display: none;">
+                </div>
+        </section>
+    </div>
+
+    <footer>
+        <p>&copy; 2025 St.John Bosco Study Hub. All rights reserved. | <a href="credits.html">Credits</a></p>
+    </footer>
+
+    <script src="script.js"></script>
+    <script>
+        const quizzes = {
+            'Mathematics': [
+                {
+                    question: "What is the place value of the digit '5' in the number 758,123?",
+                    options: ["Hundreds", "Thousands", "Ten Thousands", "Hundred Thousands"],
+                    answer: "Ten Thousands"
+                },
+                {
+                    question: "How do you write 45,678 in words?",
+                    options: ["Forty-five thousand six hundred seventy-eight", "Four hundred fifty-six thousand seventy-eight", "Forty-five six hundred seventy-eight", "Four thousand five hundred sixty-seven eight"],
+                    answer: "Forty-five thousand six hundred seventy-eight"
+                },
+                {
+                    question: "What is 12,345 + 54,321?",
+                    options: ["66,666", "65,432", "66,543", "67,890"],
+                    answer: "66,666"
+                },
+            ],
+            'Science': [
+                {
+                    question: "Which of the following is a microorganism?",
+                    options: ["A tree", "An elephant", "A bacterium", "A rock"],
+                    answer: "A bacterium"
+                },
+                {
+                    question: "What is the function of a switch in an electrical circuit?",
+                    options: ["To increase voltage", "To generate power", "To open and close the circuit", "To store energy"],
+                    answer: "To open and close the circuit"
+                },
+            ],
+            'Malay Language': [
+                {
+                    question: "Apakah kata nama am yang paling sesuai untuk 'sekolah'?",
+                    options: ["Puan Siti", "Bangunan", "Pensel", "Malaysia"],
+                    answer: "Bangunan"
+                },
+            ],
+            'Tamil Language': [
+                {
+                    question: "தமிழில் 'பூனை' என்பதன் பொருள் என்ன?",
+                    options: ["Dog", "Cat", "Bird", "Fish"],
+                    answer: "Cat"
+                },
+            ],
+            'History': [
+                {
+                    question: "Who was the first Prime Minister of Malaysia?",
+                    options: ["Tun Dr. Mahathir Mohamad", "Tunku Abdul Rahman Putra Al-Haj", "Tun Hussein Onn", "Tun Abdul Razak Hussein"],
+                    answer: "Tunku Abdul Rahman Putra Al-Haj"
+                },
+                {
+                    question: "In what year did Malaysia gain independence?",
+                    options: ["1957", "1963", "1965", "1970"],
+                    answer: "1957"
+                }
+            ],
+            'English Language': [
+                {
+                    question: "Which of the following is a synonym for 'happy'?",
+                    options: ["Angry", "Joyful", "Sad", "Tired"],
+                    answer: "Joyful"
+                },
+                {
+                    question: "Complete the sentence: 'The cat sat _____ the mat.'",
+                    options: ["in", "on", "at", "by"],
+                    answer: "on"
+                }
+            ]
+        };
+
+        let currentQuiz = {};
+        let timer;
+        let timeLeft = 300;
+        let quizStarted = false;
+        let bestTime = localStorage.getItem('bestQuizTime') || Infinity;
+
+        function startQuiz(subject) {
+            if (quizStarted) {
+                alert('A quiz is already in progress. Please submit or let it finish before starting a new one.');
+                return;
+            }
+
+            const selectedQuizQuestions = quizzes[subject];
+            if (!selectedQuizQuestions || selectedQuizQuestions.length === 0) {
+                alert(`No quiz questions are available for ${subject} yet. Please try another subject!`);
+                return;
+            }
+
+            quizStarted = true;
+            currentQuiz = {
+                subject: subject,
+                questions: selectedQuizQuestions.sort(() => Math.random() - 0.5)
+            };
+
+            const quizContainer = document.getElementById('subject-quiz-container');
+            quizContainer.innerHTML = '';
+            
+            currentQuiz.questions.forEach((q, index) => {
+                const questionDiv = document.createElement('div');
+                questionDiv.classList.add('quiz-question-container');
+                questionDiv.innerHTML = `
+                    <p class="quiz-question">Question ${index + 1}: ${q.question}</p>
+                    <div class="quiz-options">
+                        ${q.options.map((option, i) => `
+                            <label>
+                                <input type="radio" name="question${index}" value="${option}">
+                                ${option}
+                            </label>
+                        `).join('')}
+                    </div>
+                `;
+                quizContainer.appendChild(questionDiv);
+            });
+
+            document.getElementById('quiz-results').style.display = 'none';
+            quizContainer.style.display = 'block';
+            document.getElementById('quiz-submit-button').style.display = 'block';
+            
+            timeLeft = 300;
+            document.getElementById('quiz-timer-container').style.display = 'block';
+            document.getElementById('timer-display').textContent = '05:00';
+            
+            if (timer) {
+                clearInterval(timer);
+            }
+            timer = setInterval(updateTimer, 1000);
+        }
+
+        document.getElementById('quiz-submit-button').addEventListener('click', submitQuiz);
+
+        function submitQuiz() {
+            if (!quizStarted) return;
+            
+            clearInterval(timer);
+            quizStarted = false;
+            let score = 0;
+            
+            const quizContainer = document.getElementById('subject-quiz-container');
+            const questionContainers = quizContainer.querySelectorAll('.quiz-question-container');
+            
+            questionContainers.forEach((qContainer, index) => {
+                const selectedOption = qContainer.querySelector(`input[name="question${index}"]:checked`);
+                const correctOption = currentQuiz.questions[index].answer;
+                const labels = qContainer.querySelectorAll('label');
+
+                labels.forEach(label => {
+                    const input = label.querySelector('input');
+                    if (input.value === correctOption) {
+                        label.classList.add('correct');
+                    }
+                    if (selectedOption && input.checked && input.value !== correctOption) {
+                        label.classList.add('incorrect');
+                    }
+                    input.disabled = true;
+                });
+
+                if (selectedOption && selectedOption.value === correctOption) {
+                    score++;
+                }
+            });
+
+            displayResults(score);
+            
+            const timeTaken = 300 - timeLeft;
+            if (timeTaken < bestTime) {
+                bestTime = timeTaken;
+                localStorage.setItem('bestQuizTime', bestTime);
+            }
+        }
+
+        function updateTimer() {
+            const timerDisplay = document.getElementById('timer-display');
+            if (timeLeft > 0) {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                timerDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            } else {
+                clearInterval(timer);
+                alert("Time's up! The quiz will now be submitted.");
+                submitQuiz();
+            }
+        }
+
+        function displayResults(score) {
+            const resultsDiv = document.getElementById('quiz-results');
+            const totalQuestions = currentQuiz.questions.length;
+            const percentage = (score / totalQuestions) * 100;
+            let message = '';
+            
+            if (percentage === 100) {
+                message = "Excellent! You're a quiz master!";
+            } else if (percentage >= 80) {
+                message = "Great job! You're doing very well.";
+            } else if (percentage >= 50) {
+                message = "Good effort. Keep studying to improve!";
+            } else {
+                message = "You can do better. Review the notes and try again.";
+            }
+
+            const timeTaken = 300 - timeLeft;
+            const formattedTimeTaken = formatTime(timeTaken);
+            const formattedBestTime = bestTime !== Infinity ? formatTime(bestTime) : 'N/A';
+
+            resultsDiv.innerHTML = `
+                <h3>Quiz Results for ${currentQuiz.subject}</h3>
+                <p>You scored ${score} out of ${totalQuestions} questions.</p>
+                <p id="grade-message">${message}</p>
+                <p>Your time taken: ${formattedTimeTaken}</p>
+                <p>Best time for this quiz: ${formattedBestTime}</p>
+                <button id="try-again-button" onclick="resetQuiz()">Try Again</button>
+            `;
+
+            resultsDiv.style.display = 'block';
+            document.getElementById('subject-quiz-container').style.display = 'none';
+            document.getElementById('quiz-submit-button').style.display = 'none';
+            document.getElementById('quiz-timer-container').style.display = 'none';
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            return `${minutes.toString().padStart(2, '0')}:${remainingSeconds.toString().padStart(2, '0')}`;
+        }
+
+        function resetQuiz() {
+            document.getElementById('quiz-results').style.display = 'none';
+            document.getElementById('quiz-timer-container').style.display = 'none';
+            currentQuiz = {};
+            quizStarted = false;
+            document.getElementById('subject-quiz-container').innerHTML = '';
+        }
+    </script>
+</body>
+</html>
